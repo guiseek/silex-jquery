@@ -12,10 +12,26 @@ $app = new Application();
 
 $app['debug'] = true;
 
+$app->register(new DoctrineServiceProvider(), array(
+	'db.options' => array (
+		'driver' => 'pdo_mysql',
+		'host' => 'localhost',
+		'port' => '3306',
+		'user' => 'root',
+		'password' => 'root',
+		'dbname' => 'silex'
+	)
+));
+
+$app->register(new TwigServiceProvider(), array(
+	'twig.path' => __DIR__ . '/views' 
+));
+
 $restUser = $app['controllers_factory'];
-$restUser->get('/{id}', 'Rock\RestController\UserController::index')->value('id', null);
-$restUser->post('/save', 'Rock\RestController\UserController::save');
-$restUser->delete('/delete/{id}', 'Rock\RestController\UserController::delete')->value('id', null);
+$restUser->get('/{id}', 'Rock\Rest\Controller\UserController::index')->value('id', null);
+$restUser->post('/', 'Rock\Rest\Controller\UserController::create');
+$restUser->put('/{id}', 'Rock\Rest\Controller\UserController::update')->value('id', null);
+$restUser->delete('/{id}', 'Rock\Rest\Controller\UserController::delete')->value('id', null);
 $app->mount('/rest/user', $restUser);
 
 $index = $app['controllers_factory'];
@@ -25,21 +41,6 @@ $app->mount('/', $index);
 $user = $app['controllers_factory'];
 $user->get('/', 'Rock\Controller\UserController::index');
 $app->mount('/user', $user);
-
-$app->register (new DoctrineServiceProvider(), array(
-	'db.options' => array (
-		'driver' => 'pdo_mysql',
-		'host' => 'localhost',
-		'port' => '3306',
-		'user' => 'root',
-		'password' => 'root',
-		'dbname' => 'silex' 
-	) 
-));
-
-$app->register(new TwigServiceProvider(), array(
-	'twig.path' => __DIR__ . '/views' 
-));
 
 $app->error(function (\Exception $e, $code) use ($app) {
 	switch ($code) {
